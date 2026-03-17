@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snakes & Wizards - Board Game Cafe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(102, 126, 234, 0.8); }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            line-height: 1.6;
+            color: #1a1a1a;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            min-height: 100vh;
+        }
+
+        header {
+            background: rgba(15, 15, 30, 0.95);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 1.2rem 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2.5rem;
+        }
+
+        nav a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover {
+            color: white;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        main {
+            margin-top: 60px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8rem 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            animation: slideIn 0.8s ease;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.95;
+            font-weight: 300;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.2rem;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 0.7rem;
+        }
+
+        .btn-primary {
+            background: #ff6b6b;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #ee5a52;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
+        }
+
+        section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        section h2 {
+            font-size: 2.8rem;
+            margin-bottom: 3rem;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .gallery-item {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+            animation: fadeInScale 0.6s ease;
+            background: rgba(102, 126, 234, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 16px 48px rgba(102, 126, 234, 0.3);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.08);
+        }
+
+        .gallery-item p {
+            padding: 1rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .game-category {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            padding: 2.2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.4s ease;
+            animation: slideIn 0.6s ease;
+        }
+
+        .game-category:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 48px rgba(102, 126, 234, 0.25);
+            border-color: rgba(102, 126, 234, 0.4);
+            background: rgba(102, 126, 234, 0.12);
+        }
+
+        .game-category h3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .game-category p {
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1.2rem;
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+
+        .game-category ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .game-category li {
+            padding: 0.7rem 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+            color: rgba(255, 255, 255, 0.85);
+            transition: all 0.2s ease;
+        }
+
+        .game-category li:last-child {
+            border-bottom: none;
+        }
+
+        .game-category li:hover {
+            color: #667eea;
+            padding-left: 0.5rem;
+        }
+
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .menu-category {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            padding: 2.2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.4s ease;
+            animation: slideIn 0.6s ease;
+        }
+
+        .menu-category:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 48px rgba(102, 126, 234, 0.25);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .menu-category h3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.9rem 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            padding-left: 0.5rem;
+        }
+
+        .menu-item-name {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .menu-item-price {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .menu-note {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-style: italic;
+            margin-top: 2rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.4s ease;
+            animation: slideIn 0.6s ease;
+        }
+
+        .info-box:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 48px rgba(102, 126, 234, 0.25);
+            border-color: rgba(102, 126, 234, 0.4);
+        }
+
+        .info-box h3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .schedule-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.9rem 0;
+            border-bottom: 1px solid rgba(102, 126, 234, 0.1);
+            transition: all 0.2s ease;
+        }
+
+        .schedule-item:last-child {
+            border-bottom: none;
+        }
+
+        .schedule-item:hover {
+            padding-left: 0.5rem;
+        }
+
+        .schedule-day {
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .schedule-time {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .location-text {
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .location-text strong {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .map-button {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.9rem 1.8rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .map-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .social-links a {
+            display: inline-block;
+            padding: 0.9rem 1.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .social-links a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        footer {
+            background: rgba(15, 15, 30, 0.95);
+            color: rgba(255, 255, 255, 0.8);
+            text-align: center;
+            padding: 3rem 2rem;
+            margin-top: 4rem;
+            border-top: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        footer p {
+            transition: all 0.3s ease;
+        }
+
+        footer p:first-child {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        footer p:last-child {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+
+        @media (max-width: 768px) {
+            nav ul {
+                gap: 1rem;
+                font-size: 0.85rem;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            section h2 {
+                font-size: 2rem;
+            }
+
+            .btn {
+                display: block;
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <header>
+        <nav>
+            <div class="logo">
+                <div class="logo-icon">🧙</div>
+                Snakes & Wizards
+            </div>
+            <ul>
+                <li><a href="#hero">Acasă</a></li>
+                <li><a href="#galerie">Galerie</a></li>
+                <li><a href="#jocuri">Jocuri</a></li>
+                <li><a href="#meniu">Meniu</a></li>
+                <li><a href="#program">Program</a></li>
+                <li><a href="tel:+40726387225">Rezervă</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="hero" class="hero">
+            <div class="hero-content">
+                <h1>🎲 Snakes & Wizards 🧙</h1>
+                <p>Peste 500 de jocuri de societate, băuturi artizanale și o atmosferă magică te așteaptă.</p>
+                <a href="tel:+40726387225" class="btn btn-primary">Rezervă o Masă</a>
+                <a href="#jocuri" class="btn btn-secondary">Vezi Jocurile</a>
+            </div>
+        </section>
+
+        <!-- Gallery Section -->
+        <section id="galerie">
+            <h2>📸 Imagini din Sanctuar</h2>
+            <p style="text-align: center; color: rgba(255, 255, 255, 0.7); margin-bottom: 3rem; font-size: 1.05rem;">Aruncă o privire în lumea noastră de zaruri, cărți și aventuri.</p>
+            <div class="gallery">
+                <div class="gallery-item">
+                    <img src="https://snakes-and-wizards.lovable.app/assets/gallery-1-C6giWAPQ.jpg" alt="Atmosfera din cafenea">
+                    <p>Atmosfera din cafenea</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://snakes-and-wizards.lovable.app/assets/gallery-2-DLxMbaEe.jpg" alt="Board games în acțiune">
+                    <p>Board games în acțiune</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://snakes-and-wizards.lovable.app/assets/gallery-3-Bqqlubaa.jpg" alt="Jocuri de societate">
+                    <p>Jocuri de societate</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://snakes-and-wizards.lovable.app/assets/gallery-4-q-7dwXsN.jpg" alt="Seară de jocuri">
+                    <p>Seară de jocuri</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://snakes-and-wizards.lovable.app/assets/gallery-5-Dm3hmOQ8.jpg" alt="Colecția de jocuri">
+                    <p>Colecția de jocuri</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Games Section -->
+        <section id="jocuri">
+            <h2>🎮 Peste 500 de Jocuri</h2>
+            <p style="text-align: center; color: rgba(255, 255, 255, 0.7); margin-bottom: 3rem; font-size: 1.05rem;">De la clasice la cele mai noi lansări — avem ceva pentru fiecare aventurier.</p>
+            <div class="games-grid">
+                <div class="game-category">
+                    <h3>♟️ Strategie</h3>
+                    <p>Cucerește, construiește, domină.</p>
+                    <ul>
+                        <li>Catan</li>
+                        <li>Terraforming Mars</li>
+                        <li>Scythe</li>
+                        <li>7 Wonders</li>
+                        <li>Wingspan</li>
+                    </ul>
+                </div>
+                <div class="game-category">
+                    <h3>🎉 Party Games</h3>
+                    <p>Râsete garantate în grup.</p>
+                    <ul>
+                        <li>Codenames</li>
+                        <li>Dixit</li>
+                        <li>Wavelength</li>
+                        <li>Telestrations</li>
+                        <li>Just One</li>
+                    </ul>
+                </div>
+                <div class="game-category">
+                    <h3>🤝 Cooperativ</h3>
+                    <p>Echipa bate totul.</p>
+                    <ul>
+                        <li>Pandemic</li>
+                        <li>Spirit Island</li>
+                        <li>Gloomhaven</li>
+                        <li>The Crew</li>
+                        <li>Forbidden Island</li>
+                    </ul>
+                </div>
+                <div class="game-category">
+                    <h3>🐉 RPG & Aventură</h3>
+                    <p>Creează-ți povestea.</p>
+                    <ul>
+                        <li>D&D Starter Sets</li>
+                        <li>Descent</li>
+                        <li>Mansions of Madness</li>
+                        <li>Betrayal at House on the Hill</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Menu Section -->
+        <section id="meniu">
+            <h2>🍺 Grimoarul Gusturilor</h2>
+            <p style="text-align: center; color: rgba(255, 255, 255, 0.7); margin-bottom: 3rem; font-size: 1.05rem;">Poțiuni, elixiruri și gustări pentru fiecare aventurier.</p>
+            <div class="menu-grid">
+                <div class="menu-category">
+                    <h3>☕ Cafea & Ceai</h3>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Espresso</span>
+                        <span class="menu-item-price">8 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Cappuccino</span>
+                        <span class="menu-item-price">12 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Latte</span>
+                        <span class="menu-item-price">14 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Ceai specialty</span>
+                        <span class="menu-item-price">10 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Ciocolată caldă</span>
+                        <span class="menu-item-price">14 lei</span>
+                    </div>
+                </div>
+
+                <div class="menu-category">
+                    <h3>🥤 Limonade & Răcoritoare</h3>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Limonadă clasică</span>
+                        <span class="menu-item-price">14 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Limonadă cu lavandă</span>
+                        <span class="menu-item-price">16 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Smoothie fructe</span>
+                        <span class="menu-item-price">18 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Apă minerală</span>
+                        <span class="menu-item-price">6 lei</span>
+                    </div>
+                </div>
+
+                <div class="menu-category">
+                    <h3>🍺 Bere & Cocktailuri</h3>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Bere craft (draft)</span>
+                        <span class="menu-item-price">16 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Bere la sticlă</span>
+                        <span class="menu-item-price">12 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Cocktail clasic</span>
+                        <span class="menu-item-price">25 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Spritz</span>
+                        <span class="menu-item-price">22 lei</span>
+                    </div>
+                </div>
+
+                <div class="menu-category">
+                    <h3>🍖 Gustări</h3>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Nachos cu sos</span>
+                        <span class="menu-item-price">22 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Bruschete</span>
+                        <span class="menu-item-price">18 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Platou brânzeturi</span>
+                        <span class="menu-item-price">35 lei</span>
+                    </div>
+                    <div class="menu-item">
+                        <span class="menu-item-name">Prăjitură zilei</span>
+                        <span class="menu-item-price">16 lei</span>
+                    </div>
+                </div>
+            </div>
+            <p class="menu-note" style="text-align: center;">Prețurile sunt orientative și pot varia. Întreabă staff-ul pentru meniul complet.</p>
+        </section>
+
+        <!-- Contact & Hours Section -->
+        <section id="program">
+            <h2>📍 Când ne Găsești</h2>
+            <div class="info-grid">
+                <div class="info-box">
+                    <h3>⏰ Program</h3>
+                    <div class="schedule-item">
+                        <span class="schedule-day">Luni - Vineri</span>
+                        <span class="schedule-time">17:00 - 00:00</span>
+                    </div>
+                    <div class="schedule-item">
+                        <span class="schedule-day">Sâmbătă</span>
+                        <span class="schedule-time">14:00 - 00:00</span>
+                    </div>
+                    <div class="schedule-item">
+                        <span class="schedule-day">Duminică</span>
+                        <span class="schedule-time">17:00 - 22:00</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>📍 Locație</h3>
+                    <div class="location-text">
+                        <strong>Strada Ieremia Grigorescu 24</strong><br>
+                        București, România<br><br>
+                        <strong>Tel: +40 726 387 225</strong>
+                    </div>
+                    <a href="https://share.google/Dq5VGq72wG60wdUdv" class="map-button" target="_blank">🗺️ Deschide pe Google Maps</a>
+                </div>
+
+                <div class="info-box">
+                    <h3>📱 Urmărește-ne</h3>
+                    <div class="social-links">
+                        <a href="https://www.instagram.com/snakes_and_wizards/" target="_blank">Instagram</a>
+                        <a href="https://www.tripadvisor.com/Restaurant_Review-g294458-d12175966-Reviews-Snakes_Wizards_Board_Game_Cafe-Bucharest.html" target="_blank">TripAdvisor</a>
+                        <a href="https://share.google/Dq5VGq72wG60wdUdv" target="_blank">Google Maps</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>🧙 Snakes & Wizards © 2026 - Toate drepturile rezervate.</p>
+        <p>Creat cu ❤️ pentru pasionații de board games și aventuri magice ✨</p>
+    </footer>
+</body>
+</html>
